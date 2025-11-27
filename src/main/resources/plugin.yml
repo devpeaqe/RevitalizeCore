@@ -1,0 +1,5 @@
+name: RevitalizeCore
+version: '1.0'
+main: de.peaqe.revitalizecore.RevitalizeCore
+api-version: '1.21'
+authors: [ peaqe ]
