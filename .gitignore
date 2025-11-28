@@ -113,4 +113,3 @@ buildNumber.properties
 # Common working directory
 run/
 /src/main/java/de/peaqe/revitalizecore/modules/test/
-/src/main/java/de/peaqe/revitalizecore/modules/test/
