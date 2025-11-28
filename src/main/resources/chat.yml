@@ -1,0 +1,43 @@
+# Ob das Chat-Modul aktiv ist
+enabled: true
+
+# Prefix für alle Nachrichten, durch den ChatManager
+prefix: "&8[&cCHAT&8] × §7%message%"
+
+# Farbe für die Nachrichten
+textColor: "&7"
+#Farbe für Highlights in den Nachrichten
+highlightColor: "&c"
+
+# Format des Chats
+# Platzhalter:
+# %prefix%  = Chat Prefix
+# %player%  = Spielername
+# %message% = Nachricht
+format: "%prefix% &f%player% &8» &7%message%"
+
+staff:
+  # Benachrichtigung bei badwords für Teammitglieder
+  notify:
+    enabled: true
+    text: "&c&lFILTER &r&8: &c%player% &8» &c%message%"
+
+  # Chat-Trenner zum Hervorheben, der Staff-Nachrichten
+  splitter:
+    enabled: true
+    text: "========================================"
+
+# Bad-Word-Filter
+filter:
+  enabled: true
+  # Modus: "REPLACE" oder "BLOCK"
+  mode: "REPLACE"
+  # Wenn REPLACE: durch was ersetzt werden soll
+  replacement: "***"
+  badwords:
+    - "hurensohn"
+    - "nazi"
+    - "fuck"
+
+# Nachricht, wenn BLOCK aktiv ist
+block-message: "&cDeine Nachricht enthält unerlaubte Wörter."

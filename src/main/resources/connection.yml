@@ -1,0 +1,26 @@
+# Config zum konfigurieren, der Join/Quit Nachrichten
+# Made by peaqe
+
+chat:
+  # Setze hier den Prefix, der vor der Join/Quit Nachricht angezeigt werden soll.
+  prefix: "&8[&cSYSTEM&8] × "
+
+  # Farbe aller Systemnachrichten
+  textColor: "&7"
+
+  # Farbe aller Highlights, der Systemnachrichten
+  highlightColor: "&c"
+
+# (De-)aktiviere die Join/Quit Nachrichten
+connection:
+
+  # Konfiguriere die Join Nachricht und/oder (de)aktiviere sie
+  join:
+    enabled: true
+    message: "&a+ &7%player%"
+
+  # Konfiguriere die Quit Nachricht und/oder (de)aktiviere sie
+  quit:
+    enabled: true
+    message: "&c- &7%player%"
+

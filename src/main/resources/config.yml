@@ -1,0 +1,22 @@
+# Dis- or Enable Modules
+# Made by peaqe
+
+# Database connection
+database:
+  hostname: "localhost"
+  port: 3306
+  database: "revitalize"
+  username: "pq"
+  password: "1234"
+
+# Modules
+modules:
+
+  # Chat Module (Chat-Filter)
+  chat:
+    enabled: true
+
+  # Connection Module (Join/Leave Messages)
+  connection:
+    enabled: true
+
