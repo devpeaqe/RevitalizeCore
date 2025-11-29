@@ -24,6 +24,13 @@ public class MessageUtil {
         this.highlightColor = highlightColor;
     }
 
+    public MessageUtil(Plugin plugin) {
+        this.plugin = plugin;
+        this.prefix = "§8[§cSYSTEM§8] ×";
+        this.textColor = "§7";
+        this.highlightColor = "§c";
+    }
+
     public String compileMessage(String message, String... highlights) {
 
         for (var highlight : highlights) {
