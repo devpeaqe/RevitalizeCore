@@ -1,0 +1,37 @@
+package de.peaqe.revitalizecore.modules.coins;
+
+import de.peaqe.revitalizecore.RevitalizeCore;
+import de.peaqe.revitalizecore.framework.annotation.RevitalizeModule;
+import de.peaqe.revitalizecore.modules.coins.commands.CoinsCommand;
+import de.peaqe.revitalizecore.utils.MessageUtil;
+import lombok.Getter;
+
+/**
+ * *
+ *
+ * @author peaqe
+ * @version 1.0
+ * @since 29.11.2025 | 01:18 Uhr
+ * *
+ */
+
+@Getter
+@RevitalizeModule(name = "coins")
+public class CoinsModule {
+
+    private RevitalizeCore revitalizeCore;
+    private MessageUtil messageUtil;
+
+    public CoinsModule() {
+    }
+
+    public void onLoad(RevitalizeCore revitalizeCore) {
+        this.revitalizeCore = revitalizeCore;
+        this.messageUtil = new MessageUtil(this.revitalizeCore);
+    }
+
+    public void onEnable(RevitalizeCore revitalizeCore) {
+        new CoinsCommand(this);
+    }
+
+}
