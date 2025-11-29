@@ -72,6 +72,9 @@ public class PlayerInfoCommand implements CommandExecutor, TabExecutor {
                     "UUID: %s", targetObject.uniqueId().toString()
             ));
             sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
+                    "Coins: %s", String.valueOf(targetObject.coins())
+            ));
+            sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
                     "§8=================================="
             ));
 
@@ -92,7 +95,7 @@ public class PlayerInfoCommand implements CommandExecutor, TabExecutor {
         if (args.length == 1) {
             var input = args[0];
             this.playerModule.getRevitalizeCore().getServer().getOnlinePlayers().forEach(player -> {
-                if (input.toLowerCase().startsWith(player.getName().toLowerCase())) list.add(player.getName());
+                if (player.getName().toLowerCase().startsWith(input.toLowerCase())) list.add(player.getName());
             });
         }
 

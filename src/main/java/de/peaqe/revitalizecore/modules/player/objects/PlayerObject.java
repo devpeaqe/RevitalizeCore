@@ -11,6 +11,6 @@ import java.util.UUID;
  * *
  */
 
-public record PlayerObject(String name, UUID uniqueId) {
+public record PlayerObject(String name, UUID uniqueId, int coins) {
 
 }

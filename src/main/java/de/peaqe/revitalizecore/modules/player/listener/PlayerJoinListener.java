@@ -41,7 +41,7 @@ public class PlayerJoinListener implements Listener {
                     var object = repo.get(uuid, db);
 
                     if (object == null) {
-                        object = new PlayerObject(player.getName(), player.getUniqueId());
+                        object = new PlayerObject(player.getName(), player.getUniqueId(), 1000);
                         repo.update(uuid, object);
                         repo.save(uuid, object, db);
 
