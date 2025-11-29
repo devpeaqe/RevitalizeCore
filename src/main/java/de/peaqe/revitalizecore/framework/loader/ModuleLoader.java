@@ -3,6 +3,7 @@ package de.peaqe.revitalizecore.framework.loader;
 import de.peaqe.revitalizecore.RevitalizeCore;
 import de.peaqe.revitalizecore.config.ModuleConfig;
 import de.peaqe.revitalizecore.framework.annotation.RevitalizeModule;
+import lombok.Getter;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -24,6 +25,8 @@ import java.util.jar.JarFile;
 public class ModuleLoader {
 
     private static final String BASE_PACKAGE = "de.peaqe.revitalizecore.modules";
+    @Getter
+    private static List<String> modules = new ArrayList<>();
 
     public static List<Object> loadModules(RevitalizeCore core) {
 
@@ -60,6 +63,7 @@ public class ModuleLoader {
 
                 core.getLogger().info("Loaded module: " + name);
                 loadedModules.add(instance);
+                modules.add(name);
 
             } catch (Exception exception) {
                 core.getLogger().severe("Cannot load module: " + clazz.getSimpleName());
