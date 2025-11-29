@@ -52,4 +52,9 @@ public class DatabaseManager {
         provider.close();
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> CacheRepository<T> getRepository(String id) {
+        return (CacheRepository<T>) repositories.get(id);
+    }
+
 }
