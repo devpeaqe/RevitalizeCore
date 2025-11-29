@@ -67,7 +67,7 @@ public class ModuleCommand implements CommandExecutor, TabExecutor {
                                       @NotNull Command command,
                                       @NotNull String label,
                                       String @NotNull [] args) {
-        return null;
+        return List.of();
     }
 
 }
