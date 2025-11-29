@@ -11,6 +11,9 @@ commands:
       - repo
       - repos
       - repositories
+  modules:
+    aliases:
+      - module
   # Modules
   chatfilter:
     aliases:
