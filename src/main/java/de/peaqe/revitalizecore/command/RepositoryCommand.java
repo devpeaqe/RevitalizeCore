@@ -39,12 +39,21 @@ public class RepositoryCommand implements CommandExecutor, TabExecutor {
 
         if (!(sender.hasPermission("revitalize.command.repository"))) return true;
 
+        var repositories = this.revitalizeCore.getDatabaseManager().getRepositories();
+
+        if (repositories.isEmpty()) {
+            sender.sendMessage(this.messageUtil.compileMessage(
+                    "Derzeit sind keine %s geladen.", "Repositories"
+            ));
+            return true;
+        }
+
         sender.sendMessage(this.messageUtil.compileMessage(
                 "Aktuell sind folgende %s geladen:", "Repositories"
         ));
-        this.revitalizeCore.getDatabaseManager().getRepositories().forEach((s1, cacheRepository) -> {
+        repositories.forEach((s1, cacheRepository) -> {
             sender.sendMessage(this.messageUtil.compileMessage(
-                    "Repository: %s", s1
+                    "§8» %s", s1
             ));
         });
 
