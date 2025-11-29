@@ -30,6 +30,7 @@ public class PlayerRepository extends CacheRepository<PlayerObject> {
         db.update("""
             CREATE TABLE IF NOT EXISTS players (
                 uuid VARCHAR(36) PRIMARY KEY,
+                name VARCHAR(16) NOT NULL,
                 data JSON NOT NULL
             )
         """);
@@ -53,16 +54,33 @@ public class PlayerRepository extends CacheRepository<PlayerObject> {
         );
     }
 
+    public PlayerObject loadByName(String name, HikariDatabaseProvider db) {
+
+        return db.query(
+                "SELECT data FROM players WHERE name=?",
+                rs -> {
+                    try {
+                        if (!rs.next()) return null;
+                        var json = rs.getString("data");
+                        return gson.fromJson(json, PlayerObject.class);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                name
+        );
+    }
+
     @Override
     public void save(String uuid, PlayerObject obj, HikariDatabaseProvider db) {
 
         var json = gson.toJson(obj);
 
         db.update("""
-            REPLACE INTO players (uuid, data)
-            VALUES (?, ?)
+            REPLACE INTO players (uuid, name, data)
+            VALUES (?, ?, ?)
         """,
-                uuid, json);
+                uuid, obj.getName(), json);
     }
 
 }

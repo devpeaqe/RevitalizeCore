@@ -1,5 +1,8 @@
 package de.peaqe.revitalizecore.modules.player.objects;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 import java.util.UUID;
 
 /**
@@ -11,6 +14,12 @@ import java.util.UUID;
  * *
  */
 
-public record PlayerObject(String name, UUID uniqueId, int coins) {
+@Data
+@AllArgsConstructor
+public class PlayerObject {
+
+    private final String name;
+    private final UUID uniqueId;
+    private int coins;
 
 }
