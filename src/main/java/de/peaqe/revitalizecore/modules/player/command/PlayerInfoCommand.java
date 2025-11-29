@@ -66,13 +66,13 @@ public class PlayerInfoCommand implements CommandExecutor, TabExecutor {
                     "§8=================================="
             ));
             sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
-                    "Name: %s", targetObject.name()
+                    "Name: %s", targetObject.getName()
             ));
             sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
-                    "UUID: %s", targetObject.uniqueId().toString()
+                    "UUID: %s", targetObject.getUniqueId().toString()
             ));
             sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
-                    "Coins: %s", String.valueOf(targetObject.coins())
+                    "Coins: %s", String.valueOf(targetObject.getCoins())
             ));
             sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
                     "§8=================================="
