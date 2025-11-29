@@ -7,20 +7,25 @@ authors: [ peaqe ]
 commands:
   # Main plugin
   repository:
+    description: "Zeigt alle geladenen Repositories an"
     aliases:
       - repo
       - repos
       - repositories
   modules:
+    description: "Zeigt alle geladenen Module an"
     aliases:
       - module
   # Modules
   chatfilter:
+    description: "Verwaltet den ChatFilter"
     aliases:
       - filter
   playerinfo:
+    description: "Zeigt alle Informationen von Spielern an"
     aliases:
       - pi
       - info
       - spielerinfo
   coins:
+    description: "Verwaltet die Coins von Spielern"
