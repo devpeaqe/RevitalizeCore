@@ -1,5 +1,6 @@
 package de.peaqe.revitalizecore;
 
+import de.peaqe.revitalizecore.command.RepositoryCommand;
 import de.peaqe.revitalizecore.database.DatabaseManager;
 import de.peaqe.revitalizecore.database.HikariDatabaseProvider;
 import de.peaqe.revitalizecore.framework.loader.ModuleLoader;
@@ -30,6 +31,10 @@ public final class RevitalizeCore extends JavaPlugin {
 
         var loadedModules = ModuleLoader.loadModules(this);
         this.getLogger().info("Loaded " + loadedModules.size() + " modules.");
+
+        // Command's
+        new RepositoryCommand(this);
+
     }
 
     @Override
