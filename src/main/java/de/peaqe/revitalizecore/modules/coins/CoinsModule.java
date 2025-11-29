@@ -22,6 +22,8 @@ public class CoinsModule {
     private RevitalizeCore revitalizeCore;
     private MessageUtil messageUtil;
 
+    public static final Integer DEFAULT_COINS = 1000;
+
     public CoinsModule() {
     }
 
