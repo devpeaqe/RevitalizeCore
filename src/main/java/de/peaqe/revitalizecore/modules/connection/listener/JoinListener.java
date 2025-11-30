@@ -30,21 +30,40 @@ public class JoinListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
 
+        this.connectionModule.getLogger().debug("PlayerJoinEvent triggered for " + event.getPlayer().getName());
+
         event.joinMessage(Component.empty());
-        if (!this.connectionModule.getConnectionConfig().isJoinEnabled()) return;
+
+        if (!this.connectionModule.getConnectionConfig().isJoinEnabled()) {
+            this.connectionModule.getLogger().debug("Join messages disabled → ignoring join message for " + event.getPlayer().getName());
+            return;
+        }
 
         // ============================================================
         // SECTION 1 : MESSAGING
         // ============================================================
 
         var joinMessage = this.connectionModule.getConnectionConfig().getJoinMessage();
-        var prefixedJoinMessage = this.connectionModule.getMessageUtil().compileMessageKey(joinMessage,
-                "%player%", event.getPlayer().getName());
+        this.connectionModule.getLogger().debug("Raw join message: " + joinMessage);
+
+        var prefixedJoinMessage = this.connectionModule.getMessageUtil().compileMessageKey(
+                joinMessage,
+                "%player%", event.getPlayer().getName()
+        );
+
+        this.connectionModule.getLogger().info("Join message compiled for " + event.getPlayer().getName() + ": " + prefixedJoinMessage);
 
         this.revitalizeCore.getServer().getConsoleSender().sendMessage(prefixedJoinMessage);
+        this.connectionModule.getLogger().debug("Join message sent to console.");
+
         this.revitalizeCore.getServer().getOnlinePlayers().forEach(
-                player -> player.sendMessage(prefixedJoinMessage)
+                player -> {
+                    player.sendMessage(prefixedJoinMessage);
+                    this.connectionModule.getLogger().debug("Join message sent to player " + player.getName());
+                }
         );
+
+        this.connectionModule.getLogger().debug("Join message broadcast finished.");
 
         // ============================================================
         // SECTION 1 : MESSAGING

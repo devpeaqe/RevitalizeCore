@@ -2,6 +2,7 @@ package de.peaqe.revitalizecore.modules.chat;
 
 import de.peaqe.revitalizecore.RevitalizeCore;
 import de.peaqe.revitalizecore.framework.annotation.RevitalizeModule;
+import de.peaqe.revitalizecore.framework.loader.ModuleBase;
 import de.peaqe.revitalizecore.modules.chat.commands.ChatFilterCommand;
 import de.peaqe.revitalizecore.modules.chat.config.ChatConfig;
 import de.peaqe.revitalizecore.modules.chat.listener.ChatListener;
@@ -24,10 +25,7 @@ import java.io.File;
         name = "chat",
         enabledByDefault = true
 )
-public class ChatModule {
-
-    // Main Plugin
-    private RevitalizeCore revitalizeCore;
+public class ChatModule extends ModuleBase {
 
     // ChatModule Utility classes
     private ChatConfig chatConfig;
@@ -43,7 +41,7 @@ public class ChatModule {
     public ChatModule() {}
 
     public void onLoad(RevitalizeCore core) {
-        this.revitalizeCore = core;
+        this.setCore(core);
 
         if (!(new File(core.getDataFolder(), "chat.yml").exists()))
             core.saveResource("chat.yml", false);

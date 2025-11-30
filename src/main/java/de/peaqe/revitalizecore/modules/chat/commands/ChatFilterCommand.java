@@ -34,6 +34,7 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
         if (pluginCommand != null) {
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
+            this.chatModule.getLogger().info("ChatFilterCommand registered.");
         }
     }
 
@@ -45,7 +46,10 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
             @NotNull String[] args
     ) {
 
+        this.chatModule.getLogger().debug("ChatFilterCommand executed by " + sender.getName());
+
         if (args.length == 0) {
+            this.chatModule.getLogger().debug("No arguments → sending usage.");
             this.sendUsage(sender);
             return true;
         }
@@ -53,10 +57,15 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
         // /chatfilter enable
         if (args.length == 1 && args[0].equalsIgnoreCase("enable")) {
 
-            if (!sender.hasPermission("revitalize.command.chatfilter.enable"))
+            this.chatModule.getLogger().debug(sender.getName() + " issued: enable");
+
+            if (!sender.hasPermission("revitalize.command.chatfilter.enable")) {
+                this.chatModule.getLogger().warn(sender.getName() + " lacks permission: chatfilter.enable");
                 return true;
+            }
 
             if (this.chatModule.getChatConfig().getEnabled()) {
+                this.chatModule.getLogger().debug("ChatFilter already enabled.");
                 sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                         "Der %s ist bereits %s.",
                         "ChatFilter", "§aaktiviert"
@@ -65,6 +74,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
             }
 
             this.chatModule.getChatConfig().setEnabled(true);
+            this.chatModule.getLogger().info("ChatFilter enabled by " + sender.getName());
+
             this.chatModule.getMessageUtil().notifyStaff(
                     "Der %s wurde von %s %s",
                     "ChatFilter", sender.getName(), "§aaktiviert"
@@ -79,10 +90,15 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
         // /chatfilter disable
         if (args.length == 1 && args[0].equalsIgnoreCase("disable")) {
 
-            if (!sender.hasPermission("revitalize.command.chatfilter.disable"))
+            this.chatModule.getLogger().debug(sender.getName() + " issued: disable");
+
+            if (!sender.hasPermission("revitalize.command.chatfilter.disable")) {
+                this.chatModule.getLogger().warn(sender.getName() + " lacks permission: chatfilter.disable");
                 return true;
+            }
 
             if (!this.chatModule.getChatConfig().getEnabled()) {
+                this.chatModule.getLogger().debug("ChatFilter already disabled.");
                 sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                         "Der %s ist bereits %s.",
                         "ChatFilter", "deaktiviert"
@@ -91,6 +107,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
             }
 
             this.chatModule.getChatConfig().setEnabled(false);
+            this.chatModule.getLogger().info("ChatFilter disabled by " + sender.getName());
+
             this.chatModule.getMessageUtil().notifyStaff(
                     "Der %s wurde von %s %s",
                     "ChatFilter", sender.getName(), "deaktiviert"
@@ -102,17 +120,20 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
             return true;
         }
 
-        // ---- SECOND ARGUMENT COMMANDS ---- //
+        // SECOND ARG COMMANDS
 
         if (args.length == 2) {
 
-            // /chatfilter mode <mode>
+            // mode
             if (args[0].equalsIgnoreCase("mode") &&
                     sender.hasPermission("revitalize.command.chatfilter.mode")) {
+
+                this.chatModule.getLogger().debug(sender.getName() + " issued: mode " + args[1]);
 
                 var filterMode = FilterMode.fromString(args[1]);
 
                 if (filterMode == null) {
+                    this.chatModule.getLogger().warn("Invalid filter mode: " + args[1]);
                     sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                             "Ungültiger %s. Gültige Optionen: %s",
                             "Filter-Modus", "BLOCK, REPLACE"
@@ -122,6 +143,7 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
 
                 var current = this.chatModule.getChatConfig().getFilterMode();
                 if (filterMode == current) {
+                    this.chatModule.getLogger().debug("Filter mode already set to " + args[1]);
                     sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                             "Der %s ist bereits %s.",
                             "Filter-Modus", args[1]
@@ -130,6 +152,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                 }
 
                 this.chatModule.getChatConfig().setFilterMode(filterMode);
+                this.chatModule.getLogger().info("FilterMode changed to " + filterMode.name() + " by " + sender.getName());
+
                 this.chatModule.getMessageUtil().notifyStaff(
                         "Der %s wurde von %s auf %s gesetzt",
                         "Filter-Modus", sender.getName(), args[1]
@@ -141,10 +165,12 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                 return true;
             }
 
-            // /chatfilter add <word>
+            // add
             if ((args[0].equalsIgnoreCase("add") ||
                     args[0].equalsIgnoreCase("addword")) &&
                     sender.hasPermission("revitalize.command.chatfilter.add")) {
+
+                this.chatModule.getLogger().debug(sender.getName() + " issued: add " + args[1]);
 
                 var raw = args[1];
                 var normalized = MessageUtil.normalize(raw);
@@ -155,6 +181,7 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                         .anyMatch(normalized::equals);
 
                 if (exists) {
+                    this.chatModule.getLogger().warn("Word already in filter: " + raw);
                     sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                             "Das Wort %s ist bereits im %s.",
                             raw, "Filter"
@@ -162,7 +189,9 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                     return true;
                 }
 
-                this.chatModule.getChatConfig().addBadWord(raw); // 🔥 speichert original
+                this.chatModule.getChatConfig().addBadWord(raw);
+                this.chatModule.getLogger().info("Added badword \"" + raw + "\" by " + sender.getName());
+
                 this.chatModule.getMessageUtil().notifyStaff(
                         "Das Wort %s wurde von %s zum %s hinzugefügt.",
                         raw, sender.getName(), "Filter"
@@ -174,10 +203,12 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                 return true;
             }
 
-            // /chatfilter remove <word>
+            // remove
             if ((args[0].equalsIgnoreCase("remove") ||
                     args[0].equalsIgnoreCase("removeword")) &&
                     sender.hasPermission("revitalize.command.chatfilter.remove")) {
+
+                this.chatModule.getLogger().debug(sender.getName() + " issued: remove " + args[1]);
 
                 var raw = args[1];
                 var normalized = MessageUtil.normalize(raw);
@@ -188,6 +219,7 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                         .anyMatch(normalized::equals);
 
                 if (!exists) {
+                    this.chatModule.getLogger().warn("Word not found in filter: " + raw);
                     sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                             "Das Wort %s konnte nicht im %s gefunden werden!",
                             raw, "Filter"
@@ -196,6 +228,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                 }
 
                 this.chatModule.getChatConfig().removeBadWord(raw);
+                this.chatModule.getLogger().info("Removed badword \"" + raw + "\" by " + sender.getName());
+
                 this.chatModule.getMessageUtil().notifyStaff(
                         "Das Wort %s wurde von %s vom %s entfernt.",
                         raw, sender.getName(), "Filter"
@@ -207,13 +241,16 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                 return true;
             }
 
-            // /chatfilter notify <enable|disable>
+            // notify enable/disable
             if (args[0].equalsIgnoreCase("notify") &&
                     sender.hasPermission("revitalize.command.chatfilter.notify.change")) {
+
+                this.chatModule.getLogger().debug(sender.getName() + " issued: notify " + args[1]);
 
                 if (args[1].equalsIgnoreCase("enable")) {
 
                     if (this.chatModule.getChatConfig().getStaffNotifyEnabled()) {
+                        this.chatModule.getLogger().debug("Notify already enabled.");
                         sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                                 "Die %s für den %s sind bereits %s.",
                                 "Benachrichtigungen", "ChatFilter", "§aaktiviert"
@@ -222,6 +259,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                     }
 
                     this.chatModule.getChatConfig().setStaffNotifyEnabled(true);
+                    this.chatModule.getLogger().info("Notify enabled by " + sender.getName());
+
                     this.chatModule.getMessageUtil().notifyStaff(
                             "Die %s für den %s wurden von %s %s",
                             "Benachrichtigungen", "ChatFilter", sender.getName(), "§aaktiviert"
@@ -236,6 +275,7 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                 if (args[1].equalsIgnoreCase("disable")) {
 
                     if (!this.chatModule.getChatConfig().getStaffNotifyEnabled()) {
+                        this.chatModule.getLogger().debug("Notify already disabled.");
                         sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                                 "Die %s für den %s sind bereits %s.",
                                 "Benachrichtigungen", "ChatFilter", "deaktiviert"
@@ -244,6 +284,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                     }
 
                     this.chatModule.getChatConfig().setStaffNotifyEnabled(false);
+                    this.chatModule.getLogger().info("Notify disabled by " + sender.getName());
+
                     this.chatModule.getMessageUtil().notifyStaff(
                             "Die %s für den %s wurden von %s %s",
                             "Benachrichtigungen", "ChatFilter", sender.getName(), "deaktiviert"
@@ -255,24 +297,28 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                     return true;
                 }
 
+                this.chatModule.getLogger().debug("Invalid notify arg → usage sent.");
                 this.sendUsage(sender);
                 return true;
             }
 
+            this.chatModule.getLogger().debug("Second arg not matched → usage.");
             this.sendUsage(sender);
             return true;
         }
 
-        // ---- NOTIFY SPLITTER ---- //
-
+        // notify splitter
         if (args.length == 3 &&
                 args[0].equalsIgnoreCase("notify") &&
                 args[1].equalsIgnoreCase("splitter") &&
                 sender.hasPermission("revitalize.command.chatfilter.notify.splitter.change")) {
 
+            this.chatModule.getLogger().debug(sender.getName() + " issued: notify splitter " + args[2]);
+
             if (args[2].equalsIgnoreCase("enable")) {
 
                 if (this.chatModule.getChatConfig().getStaffSplitterEnabled()) {
+                    this.chatModule.getLogger().debug("Splitter already enabled.");
                     sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                             "Die %s für den %s sind bereits %s.",
                             "Trennnachrichten", "ChatFilter", "§aaktiviert"
@@ -281,6 +327,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                 }
 
                 this.chatModule.getChatConfig().setStaffSplitterEnabled(true);
+                this.chatModule.getLogger().info("Splitter enabled by " + sender.getName());
+
                 this.chatModule.getMessageUtil().notifyStaff(
                         "Die %s für den %s wurden von %s %s",
                         "Trennnachrichten", "ChatFilter", sender.getName(), "§aaktiviert"
@@ -295,6 +343,7 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
             if (args[2].equalsIgnoreCase("disable")) {
 
                 if (!this.chatModule.getChatConfig().getStaffSplitterEnabled()) {
+                    this.chatModule.getLogger().debug("Splitter already disabled.");
                     sender.sendMessage(this.chatModule.getMessageUtil().compileMessage(
                             "Die %s für den %s sind bereits %s.",
                             "Trennnachrichten", "ChatFilter", "deaktiviert"
@@ -303,6 +352,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                 }
 
                 this.chatModule.getChatConfig().setStaffSplitterEnabled(false);
+                this.chatModule.getLogger().info("Splitter disabled by " + sender.getName());
+
                 this.chatModule.getMessageUtil().notifyStaff(
                         "Die %s für den %s wurden von %s %s",
                         "Trennnachrichten", "ChatFilter", sender.getName(), "deaktiviert"
@@ -314,17 +365,17 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
                 return true;
             }
 
+            this.chatModule.getLogger().debug("Invalid splitter arg → usage.");
             this.sendUsage(sender);
             return true;
         }
 
+        this.chatModule.getLogger().debug("Invalid arguments → usage.");
         this.sendUsage(sender);
         return true;
     }
 
-    // -----------------------------------------------------------------------------------------
-    // TAB COMPLETION
-    // -----------------------------------------------------------------------------------------
+    // TAB COMPLETION ---------------------------------------------------------------------
 
     @Nullable
     @Override
@@ -334,6 +385,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
             @NotNull String s,
             @NotNull String[] args
     ) {
+
+        this.chatModule.getLogger().debug("TabComplete triggered: args=" + String.join(", ", args));
 
         if (args.length == 1) {
             var list = new ArrayList<String>();
@@ -409,6 +462,8 @@ public class ChatFilterCommand implements CommandExecutor, TabExecutor {
     }
 
     private void sendUsage(CommandSender sender) {
+
+        this.chatModule.getLogger().debug("sendUsage() called.");
 
         var entries = List.of(
                 new UsageEntry("enable", "enable"),

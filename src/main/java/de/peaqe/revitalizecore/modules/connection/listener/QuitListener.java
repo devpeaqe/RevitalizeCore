@@ -25,26 +25,44 @@ public class QuitListener implements Listener {
         this.connectionModule = connectionModule;
         this.revitalizeCore = this.connectionModule.getRevitalizeCore();
         this.revitalizeCore.getServer().getPluginManager().registerEvents(this, this.revitalizeCore);
+
+        this.connectionModule.getLogger().info("QuitListener registered.");
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
 
-        event.quitMessage(Component.empty());
-        if (!this.connectionModule.getConnectionConfig().isQuitEnabled()) return;
+        this.connectionModule.getLogger().debug("PlayerQuitEvent triggered for " + event.getPlayer().getName());
 
+        event.quitMessage(Component.empty());
+
+        if (!this.connectionModule.getConnectionConfig().isQuitEnabled()) {
+            this.connectionModule.getLogger().debug("Quit messages disabled → ignoring quit message for " + event.getPlayer().getName());
+            return;
+        }
 
         // ============================================================
         // SECTION 1 : MESSAGING
         // ============================================================
 
         var quitMessage = this.connectionModule.getConnectionConfig().getQuitMessage();
-        var prefixedQuitMessage = this.connectionModule.getMessageUtil().compileMessageKey(quitMessage,
-                "%player%", event.getPlayer().getName());
+        this.connectionModule.getLogger().debug("Raw quit message: " + quitMessage);
+
+        var prefixedQuitMessage = this.connectionModule.getMessageUtil().compileMessageKey(
+                quitMessage,
+                "%player%", event.getPlayer().getName()
+        );
+
+        this.connectionModule.getLogger().info("Quit message compiled for " + event.getPlayer().getName() + ": " + prefixedQuitMessage);
 
         this.revitalizeCore.getServer().getConsoleSender().sendMessage(prefixedQuitMessage);
+        this.connectionModule.getLogger().debug("Quit message sent to console.");
+
         this.revitalizeCore.getServer().getOnlinePlayers().forEach(
-                player -> player.sendMessage(prefixedQuitMessage)
+                player -> {
+                    player.sendMessage(prefixedQuitMessage);
+                    this.connectionModule.getLogger().debug("Quit message sent to player " + player.getName());
+                }
         );
 
         // ============================================================
@@ -61,7 +79,6 @@ public class QuitListener implements Listener {
         // ============================================================
         // SECTION 2
         // ============================================================
-
 
     }
 

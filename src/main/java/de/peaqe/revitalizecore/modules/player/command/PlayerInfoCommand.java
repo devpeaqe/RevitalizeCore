@@ -31,19 +31,24 @@ public class PlayerInfoCommand implements CommandExecutor, TabExecutor {
         this.playerRepository = this.playerModule.getPlayerRepository();
         this.playerModule.getRevitalizeCore().getServer().getPluginCommand("playerinfo").setExecutor(this);
         this.playerModule.getRevitalizeCore().getServer().getPluginCommand("playerinfo").setTabCompleter(this);
+
+        this.playerModule.getLogger().info("PlayerInfoCommand registered");
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
 
-        // TODO: Permission check
+        this.playerModule.getLogger().debug("Command executed: /playerinfo " + String.join(" ", args));
 
         if (args.length == 1) {
 
             var targetName = args[0];
+            this.playerModule.getLogger().debug("Searching UUID for player: " + targetName);
+
             var targetUniqueId = this.playerModule.getRevitalizeCore().getServer().getPlayerUniqueId(targetName);
 
             if (targetUniqueId == null) {
+                this.playerModule.getLogger().warn("Player not found: " + targetName);
                 sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
                         "Der Spieler %s konnte nicht gefunden werden!",
                         targetName
@@ -51,16 +56,23 @@ public class PlayerInfoCommand implements CommandExecutor, TabExecutor {
                 return true;
             }
 
-            var targetObject = this.playerRepository.load(targetUniqueId.toString(),
-                    this.playerModule.getRevitalizeCore().getHikariDatabaseProvider());
+            this.playerModule.getLogger().debug("Loading PlayerObject for UUID: " + targetUniqueId);
+
+            var targetObject = this.playerRepository.load(
+                    targetUniqueId.toString(),
+                    this.playerModule.getRevitalizeCore().getHikariDatabaseProvider()
+            );
 
             if (targetObject == null) {
+                this.playerModule.getLogger().warn("PlayerObject not registered: " + targetName);
                 sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
                         "Der Spieler %s ist nicht auf dem %s registriert!",
                         targetName, "Server"
                 ));
                 return true;
             }
+
+            this.playerModule.getLogger().info("Sending player info for: " + targetName);
 
             sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
                     "§8=================================="
@@ -77,10 +89,7 @@ public class PlayerInfoCommand implements CommandExecutor, TabExecutor {
             sender.sendMessage(this.playerModule.getMessageUtil().compileMessage(
                     "§8=================================="
             ));
-
         }
-
-        // TODO: Usage message
 
         return false;
     }
@@ -90,9 +99,10 @@ public class PlayerInfoCommand implements CommandExecutor, TabExecutor {
 
         var list = new ArrayList<String>();
 
-        // TODO: Permission check
-
         if (args.length == 1) {
+
+            this.playerModule.getLogger().debug("TabComplete lookup for input: " + args[0]);
+
             var input = args[0];
             this.playerModule.getRevitalizeCore().getServer().getOnlinePlayers().forEach(player -> {
                 if (player.getName().toLowerCase().startsWith(input.toLowerCase())) list.add(player.getName());

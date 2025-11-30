@@ -33,13 +33,16 @@ public class PlayerQuitListener implements Listener {
         var repo = playerModule.getPlayerRepository();
         var db = playerModule.getRevitalizeCore().getHikariDatabaseProvider();
 
+        playerModule.getLogger().info("Player quit: " + player.getName());
+
         Bukkit.getScheduler().runTaskAsynchronously(
                 playerModule.getRevitalizeCore(),
                 () -> {
+                    playerModule.getLogger().debug("Saving PlayerObject on quit for UUID: " + uuid);
                     var object = repo.get(uuid, db);
                     repo.save(uuid, object, db);
+                    playerModule.getLogger().debug("PlayerObject saved for UUID: " + uuid);
                 }
         );
     }
-
 }

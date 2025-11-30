@@ -2,6 +2,7 @@ package de.peaqe.revitalizecore.modules.coins;
 
 import de.peaqe.revitalizecore.RevitalizeCore;
 import de.peaqe.revitalizecore.framework.annotation.RevitalizeModule;
+import de.peaqe.revitalizecore.framework.loader.ModuleBase;
 import de.peaqe.revitalizecore.modules.coins.commands.CoinsCommand;
 import de.peaqe.revitalizecore.utils.MessageUtil;
 import lombok.Getter;
@@ -17,9 +18,8 @@ import lombok.Getter;
 
 @Getter
 @RevitalizeModule(name = "coins")
-public class CoinsModule {
+public class CoinsModule extends ModuleBase {
 
-    private RevitalizeCore revitalizeCore;
     private MessageUtil messageUtil;
 
     public static final Integer DEFAULT_COINS = 1000;
@@ -28,12 +28,13 @@ public class CoinsModule {
     }
 
     public void onLoad(RevitalizeCore revitalizeCore) {
-        this.revitalizeCore = revitalizeCore;
-        this.messageUtil = new MessageUtil(this.revitalizeCore);
+        this.setCore(revitalizeCore);
+        this.messageUtil = new MessageUtil(this.getRevitalizeCore());
     }
 
     public void onEnable(RevitalizeCore revitalizeCore) {
         new CoinsCommand(this);
+        this.getLogger().info("enabled");
     }
 
 }

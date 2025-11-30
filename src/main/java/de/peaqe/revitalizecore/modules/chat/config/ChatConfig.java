@@ -32,120 +32,138 @@ public class ChatConfig {
         this.revitalizeCore = chatModule.getRevitalizeCore();
         this.file = new File(this.revitalizeCore.getDataFolder(), "chat.yml");
         this.fileConfiguration = YamlConfiguration.loadConfiguration(file);
+
+        this.chatModule.getLogger().info("ChatConfig loaded from " + file.getName());
     }
 
-    // -------------------------------------------------------------------
-
-    // String configurations
-
     public final String getPrefix() {
-        return this.getString("prefix");
+        var value = this.getString("prefix");
+        this.chatModule.getLogger().debug("getPrefix() → " + value);
+        return value;
     }
 
     public final String getTextColor() {
-        return this.getString("textColor");
+        var value = this.getString("textColor");
+        this.chatModule.getLogger().debug("getTextColor() → " + value);
+        return value;
     }
 
     public final String getHighlightColor() {
-        return this.getString("highlightColor");
+        var value = this.getString("highlightColor");
+        this.chatModule.getLogger().debug("getHighlightColor() → " + value);
+        return value;
     }
 
     private String getString(String path) {
         var string = this.fileConfiguration.getString(path);
-        if (string == null) return "";
+
+        if (string == null) {
+            this.chatModule.getLogger().warn("Missing string config at path: " + path);
+            return "";
+        }
 
         return string.replace('&', '§');
     }
 
-    // String configurations
-
-    // -------------------------------------------------------------------
-
-    // Filter configuration
-
     public boolean getEnabled() {
-        return this.fileConfiguration.getBoolean("filter.enabled");
+        var value = this.fileConfiguration.getBoolean("filter.enabled");
+        this.chatModule.getLogger().debug("getEnabled() → " + value);
+        return value;
     }
 
     @SneakyThrows
     public void setEnabled(boolean enabled) {
+        this.chatModule.getLogger().info("setEnabled(" + enabled + ")");
         this.fileConfiguration.set("filter.enabled", enabled);
         this.fileConfiguration.save(this.file);
     }
 
     public String getReplacement() {
-        return this.getString("filter.replacement");
+        var value = this.getString("filter.replacement");
+        this.chatModule.getLogger().debug("getReplacement() → " + value);
+        return value;
     }
 
     public FilterMode getFilterMode() {
         var filterMode = this.fileConfiguration.getString("filter.mode");
-        if (filterMode == null) return FilterMode.REPLACE;
 
-        return FilterMode.fromString(filterMode);
+        if (filterMode == null) {
+            this.chatModule.getLogger().warn("filter.mode missing, defaulting to REPLACE");
+            return FilterMode.REPLACE;
+        }
+
+        var mode = FilterMode.fromString(filterMode);
+        this.chatModule.getLogger().debug("getFilterMode() → " + mode);
+        return mode;
     }
 
     @SneakyThrows
     public void setFilterMode(FilterMode filterMode) {
+        this.chatModule.getLogger().info("setFilterMode(" + filterMode.name() + ")");
         this.fileConfiguration.set("filter.mode", filterMode.name());
         this.fileConfiguration.save(this.file);
     }
 
     public String getBlockMessage() {
-        return this.getString("block-message");
+        var value = this.getString("block-message");
+        this.chatModule.getLogger().debug("getBlockMessage() → " + value);
+        return value;
     }
 
-    // -------------------------------------------------------------------
-
-    // STAFF
-
-    // -------------------------------------------------------------------
-
     public String getStaffNotifyText() {
-        return this.getString("staff.notify.text");
+        var value = this.getString("staff.notify.text");
+        this.chatModule.getLogger().debug("getStaffNotifyText() → " + value);
+        return value;
     }
 
     public boolean getStaffNotifyEnabled() {
-        return this.fileConfiguration.getBoolean("staff.notify.enabled");
+        var value = this.fileConfiguration.getBoolean("staff.notify.enabled");
+        this.chatModule.getLogger().debug("getStaffNotifyEnabled() → " + value);
+        return value;
     }
 
     @SneakyThrows
     public void setStaffNotifyEnabled(boolean enabled) {
+        this.chatModule.getLogger().info("setStaffNotifyEnabled(" + enabled + ")");
         this.fileConfiguration.set("staff.notify.enabled", enabled);
         this.fileConfiguration.save(this.file);
     }
 
     public boolean getStaffSplitterEnabled() {
-        return this.fileConfiguration.getBoolean("staff.splitter.enabled");
+        var value = this.fileConfiguration.getBoolean("staff.splitter.enabled");
+        this.chatModule.getLogger().debug("getStaffSplitterEnabled() → " + value);
+        return value;
     }
 
     @SneakyThrows
     public void setStaffSplitterEnabled(boolean enabled) {
+        this.chatModule.getLogger().info("setStaffSplitterEnabled(" + enabled + ")");
         this.fileConfiguration.set("staff.splitter.enabled", enabled);
         this.fileConfiguration.save(this.file);
     }
 
     public String getStaffSplitterText() {
-        return this.getString("staff.splitter.text");
+        var value = this.getString("staff.splitter.text");
+        this.chatModule.getLogger().debug("getStaffSplitterText() → " + value);
+        return value;
     }
 
     @SneakyThrows
     public void setStaffSplitterText(String splitter) {
+        this.chatModule.getLogger().info("setStaffSplitterText(" + splitter + ")");
         this.fileConfiguration.set("staff.splitter.text", splitter);
         this.fileConfiguration.save(this.file);
     }
 
-    // -------------------------------------------------------------------
-
-    // STAFF
-
-    // -------------------------------------------------------------------
-
     public List<String> getBadWords() {
-        return this.fileConfiguration.getStringList("filter.badwords");
+        var value = this.fileConfiguration.getStringList("filter.badwords");
+        this.chatModule.getLogger().debug("getBadWords() → " + value);
+        return value;
     }
 
     @SneakyThrows
     public void addBadWord(String badWord) {
+        this.chatModule.getLogger().info("addBadWord(" + badWord + ")");
         var badWords = this.getBadWords();
         badWords.add(badWord);
         this.fileConfiguration.set("filter.badwords", badWords);
@@ -154,6 +172,7 @@ public class ChatConfig {
 
     @SneakyThrows
     public void removeBadWord(String badWord) {
+        this.chatModule.getLogger().info("removeBadWord(" + badWord + ")");
         var badWords = this.getBadWords();
         badWords.remove(badWord);
         this.fileConfiguration.set("filter.badwords", badWords);

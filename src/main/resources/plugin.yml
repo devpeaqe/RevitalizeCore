@@ -6,6 +6,8 @@ authors: [ peaqe ]
 
 commands:
   # Main plugin
+  revitalize:
+    description: "Core Command"
   repository:
     description: "Zeigt alle geladenen Repositories an"
     aliases:

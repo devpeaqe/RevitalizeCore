@@ -34,18 +34,29 @@ public class PlayerJoinListener implements Listener {
         var repo = playerModule.getPlayerRepository();
         var db = playerModule.getRevitalizeCore().getHikariDatabaseProvider();
 
+        playerModule.getLogger().info("Player join: " + player.getName());
+
         Bukkit.getScheduler().runTaskAsynchronously(
                 playerModule.getRevitalizeCore(),
                 () -> {
 
+                    playerModule.getLogger().debug("Loading PlayerObject for UUID: " + uuid);
+
                     var object = repo.get(uuid, db);
 
                     if (object == null) {
+
+                        playerModule.getLogger().info("Creating new PlayerObject for " + player.getName());
+
                         object = new PlayerObject(player.getName(), player.getUniqueId(), 1000);
                         repo.update(uuid, object);
                         repo.save(uuid, object, db);
 
-                        Bukkit.getLogger().info("Neuer Spieler gespeichert: " + player.getName());
+                        playerModule.getLogger().info("Saved new PlayerObject to database for " + player.getName());
+
+                    } else {
+
+                        playerModule.getLogger().debug("Existing PlayerObject loaded for " + player.getName());
                     }
                 }
         );

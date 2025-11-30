@@ -44,6 +44,8 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
 
         pluginCommand.setExecutor(this);
         pluginCommand.setTabCompleter(this);
+
+        this.coinsModule.getLogger().info("CoinsCommand registriert.");
     }
 
     @Override
@@ -54,10 +56,14 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
             @NotNull String @NotNull [] args
     ) {
 
-        // /coins
+        this.coinsModule.getLogger().info(sender.getName() + " führt /coins aus: " + String.join(" ", args));
+
         if (args.length == 0) {
 
             if (!(sender instanceof Player player)) {
+
+                this.coinsModule.getLogger().warn(sender.getName() + " versuchte /coins außerhalb des Spiels auszuführen.");
+
                 sender.sendMessage(this.coinsModule.getMessageUtil().compileMessage(
                         "Dieser Befehl kann nur von %s ausgeführt werden!",
                         "Spielern"
@@ -65,18 +71,24 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
                 return true;
             }
 
-            var playerObject = this.getPlayerRepository().load(player.getUniqueId().toString(),
-                    this.hikariDatabaseProvider);
+            this.coinsModule.getLogger().debug("Lade Coins von " + player.getName());
+
+            var playerObject = this.getPlayerRepository().load(
+                    player.getUniqueId().toString(),
+                    this.hikariDatabaseProvider
+            );
 
             if (playerObject == null) {
+
+                this.coinsModule.getLogger().error("PlayerObject ist null für " + player.getName());
+
                 player.sendMessage(this.coinsModule.getMessageUtil().compileMessage(
                         "%s", "Es ist ein Fehler aufgetreten, bitte versuche es später erneut!"
                 ));
-                this.coinsModule.getRevitalizeCore().getLogger().severe(
-                        String.format("PlayerObject from %s is null", player.getName())
-                );
                 return true;
             }
+
+            this.coinsModule.getLogger().debug("Coins von " + player.getName() + ": " + playerObject.getCoins());
 
             player.sendMessage(this.coinsModule.getMessageUtil().compileMessage(
                     "Du hast %s Coins.", String.valueOf(playerObject.getCoins())
@@ -85,19 +97,26 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
             return true;
         }
 
-        // /coins check|info <player>
-        // /coins reset <player>
         if (args.length == 2) {
 
-            // check/info
-            if ((args[0].equalsIgnoreCase("check") || args[0].equalsIgnoreCase("info"))
+            var sub = args[0].toLowerCase();
+            var targetName = args[1];
+
+            this.coinsModule.getLogger().debug("Subcommand: " + sub + ", Target: " + targetName);
+
+            if ((sub.equals("check") || sub.equals("info"))
                     && sender.hasPermission("revitalize.command.coins.check")) {
 
-                var optionalTarget = this.getPlayerObjectFromName(sender, args[1]);
+                var optionalTarget = this.getPlayerObjectFromName(sender, targetName);
 
-                if (optionalTarget.isEmpty()) return true;
+                if (optionalTarget.isEmpty()) {
+                    this.coinsModule.getLogger().warn("Target nicht gefunden: " + targetName);
+                    return true;
+                }
 
                 var target = optionalTarget.get();
+
+                this.coinsModule.getLogger().info(sender.getName() + " prüft Coins von " + target.getName());
 
                 sender.sendMessage(this.coinsModule.getMessageUtil().compileMessage(
                         "Der Spieler %s hat %s Coins.",
@@ -107,18 +126,22 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
                 return true;
             }
 
-            // reset
-            if (args[0].equalsIgnoreCase("reset")
+            if (sub.equals("reset")
                     && sender.hasPermission("revitalize.command.coins.reset")) {
 
-                var optionalTarget = this.getPlayerObjectFromName(sender, args[1]);
+                var optionalTarget = this.getPlayerObjectFromName(sender, targetName);
 
-                if (optionalTarget.isEmpty()) return true;
+                if (optionalTarget.isEmpty()) {
+                    this.coinsModule.getLogger().warn("Target nicht gefunden: " + targetName);
+                    return true;
+                }
 
                 var target = optionalTarget.get();
                 target.setCoins(CoinsModule.DEFAULT_COINS);
 
                 this.saveAsync(target);
+
+                this.coinsModule.getLogger().info(sender.getName() + " hat die Coins von " + target.getName() + " zurückgesetzt.");
 
                 sender.sendMessage(this.coinsModule.getMessageUtil().compileMessage(
                         "Die Coins von %s wurden zurückgesetzt.", target.getName()
@@ -127,51 +150,66 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
                 return true;
             }
 
+            this.coinsModule.getLogger().warn(sender.getName() + " nutzte ungültigen Subcommand: " + sub);
+
             this.sendUsage(sender);
             return true;
         }
 
-        // /coins add|remove|set <player> <amount>
         if (args.length == 3) {
 
             var sub = args[0].toLowerCase();
+            var targetName = args[1];
+            var amountString = args[2];
+
+            this.coinsModule.getLogger().debug("Add/Remove/Set: " + sub + ", Target: " + targetName + ", Amount: " + amountString);
+
             if (!(sub.equals("add") || sub.equals("remove") || sub.equals("set"))) {
+                this.coinsModule.getLogger().warn("Ungültiges Subcommand: " + sub);
                 this.sendUsage(sender);
                 return true;
             }
 
-            // Permission check
             if (!sender.hasPermission("revitalize.command.coins." + sub)) {
+                this.coinsModule.getLogger().warn(sender.getName() + " hat keine Permission für /coins " + sub);
                 this.sendUsage(sender);
                 return true;
             }
 
-            // Amount check
-            if (!this.isAllDigits(args[2])) {
+            if (!this.isAllDigits(amountString)) {
+                this.coinsModule.getLogger().warn("Ungültige Zahl von " + sender.getName() + ": " + amountString);
+
                 sender.sendMessage(this.coinsModule.getMessageUtil().compileMessage(
                         "Bitte gebe eine gültige Zahl an!"
                 ));
                 return true;
             }
 
-            var coins = Integer.parseInt(args[2]);
-            var optionalTarget = this.getPlayerObjectFromName(sender, args[1]);
+            var amount = Integer.parseInt(amountString);
+            var optionalTarget = this.getPlayerObjectFromName(sender, targetName);
 
-            if (optionalTarget.isEmpty()) return true;
+            if (optionalTarget.isEmpty()) {
+                this.coinsModule.getLogger().warn("Spieler '" + targetName + "' nicht gefunden.");
+                return true;
+            }
 
             var target = optionalTarget.get();
             var before = target.getCoins();
 
-            // add
-            if (sub.equals("add")) target.setCoins(before + coins);
-
-            // remove
-            else if (sub.equals("remove")) target.setCoins(Math.max(before - coins, 0));
-
-            // set
-            else target.setCoins(coins);
+            if (sub.equals("add")) {
+                target.setCoins(before + amount);
+                this.coinsModule.getLogger().info(sender.getName() + " add " + amount + " Coins zu " + target.getName());
+            } else if (sub.equals("remove")) {
+                target.setCoins(Math.max(before - amount, 0));
+                this.coinsModule.getLogger().info(sender.getName() + " remove " + amount + " Coins von " + target.getName());
+            } else {
+                target.setCoins(amount);
+                this.coinsModule.getLogger().info(sender.getName() + " set Coins von " + target.getName() + " auf " + amount);
+            }
 
             this.saveAsync(target);
+
+            this.coinsModule.getLogger().debug("Vorher: " + before + ", Nachher: " + target.getCoins());
 
             sender.sendMessage(this.coinsModule.getMessageUtil().compileMessage(
                     "Die Coins von %s wurden auf %s gesetzt.",
@@ -185,10 +223,6 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
         return false;
     }
 
-    // -------------------------------------------------------
-    // TabComplete
-    // -------------------------------------------------------
-
     @Nullable
     @Override
     public List<String> onTabComplete(
@@ -198,7 +232,6 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
             @NotNull String @NotNull [] args
     ) {
 
-        // /coins (sub-command)
         if (args.length == 1) {
             var list = new ArrayList<String>();
 
@@ -222,7 +255,6 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
             return list;
         }
 
-        // /coins <sub> <player>
         if (args.length == 2) {
 
             var list = new ArrayList<String>();
@@ -248,14 +280,12 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
         return List.of();
     }
 
-    // -------------------------------------------------------
-    // Helper
-    // -------------------------------------------------------
-
     private Optional<PlayerObject> getPlayerObjectFromName(CommandSender sender, String name) {
         var object = this.getPlayerRepository().loadByName(name, this.hikariDatabaseProvider);
 
         if (object == null) {
+            this.coinsModule.getLogger().warn("PlayerObject nicht gefunden: " + name);
+
             sender.sendMessage(this.coinsModule.getMessageUtil().compileMessage(
                     "Der Spieler %s ist nicht registriert!", name
             ));
@@ -267,6 +297,7 @@ public class CoinsCommand implements CommandExecutor, TabExecutor {
 
     private void saveAsync(PlayerObject target) {
         var uuid = target.getUniqueId().toString();
+        this.coinsModule.getLogger().debug("Speichere Coins für " + target.getName());
         this.getPlayerRepository().save(uuid, target, this.hikariDatabaseProvider);
     }
 

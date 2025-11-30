@@ -29,56 +29,90 @@ public class ConnectionConfig {
         this.revitalizeCore = this.connectionModule.getRevitalizeCore();
         this.file = new File(this.revitalizeCore.getDataFolder(), "connection.yml");
         this.fileConfiguration = YamlConfiguration.loadConfiguration(file);
+
+        this.connectionModule.getLogger().info("ConnectionConfig loaded from " + file.getName());
     }
 
     // ------------------------------------------
-
     // CHAT
-
     // ------------------------------------------
 
     public String getPrefix() {
-        return this.fileConfiguration.getString("chat.prefix").replace('&', '§');
+        var value = this.fileConfiguration.getString("chat.prefix");
+        if (value == null) {
+            this.connectionModule.getLogger().warn("Missing config value: chat.prefix");
+            return "";
+        }
+        var result = value.replace('&', '§');
+        this.connectionModule.getLogger().debug("getPrefix() → " + result);
+        return result;
     }
 
     public String getTextColor() {
-        return this.fileConfiguration.getString("chat.textColor").replace('&', '§');
+        var value = this.fileConfiguration.getString("chat.textColor");
+        if (value == null) {
+            this.connectionModule.getLogger().warn("Missing config value: chat.textColor");
+            return "";
+        }
+        var result = value.replace('&', '§');
+        this.connectionModule.getLogger().debug("getTextColor() → " + result);
+        return result;
     }
 
     public String getHighlightColor() {
-        return this.fileConfiguration.getString("chat.highlightColor").replace('&', '§');
+        var value = this.fileConfiguration.getString("chat.highlightColor");
+        if (value == null) {
+            this.connectionModule.getLogger().warn("Missing config value: chat.highlightColor");
+            return "";
+        }
+        var result = value.replace('&', '§');
+        this.connectionModule.getLogger().debug("getHighlightColor() → " + result);
+        return result;
     }
 
     // ------------------------------------------
-
     // CHAT
-
     // ------------------------------------------
 
     // CONNECTION
-
     // ------------------------------------------
 
     public boolean isJoinEnabled() {
-        return this.fileConfiguration.getBoolean("connection.join.enabled");
+        var result = this.fileConfiguration.getBoolean("connection.join.enabled");
+        this.connectionModule.getLogger().debug("isJoinEnabled() → " + result);
+        return result;
     }
 
     public String getJoinMessage() {
-        return this.fileConfiguration.getString("connection.join.message").replace('&', '§');
+        var value = this.fileConfiguration.getString("connection.join.message");
+        if (value == null) {
+            this.connectionModule.getLogger().warn("Missing config value: connection.join.message");
+            return "";
+        }
+        var result = value.replace('&', '§');
+        this.connectionModule.getLogger().debug("getJoinMessage() → " + result);
+        return result;
     }
 
     public boolean isQuitEnabled() {
-        return this.fileConfiguration.getBoolean("connection.quit.enabled");
+        var result = this.fileConfiguration.getBoolean("connection.quit.enabled");
+        this.connectionModule.getLogger().debug("isQuitEnabled() → " + result);
+        return result;
     }
 
     public String getQuitMessage() {
-        return this.fileConfiguration.getString("connection.quit.message").replace('&', '§');
+        var value = this.fileConfiguration.getString("connection.quit.message");
+        if (value == null) {
+            this.connectionModule.getLogger().warn("Missing config value: connection.quit.message");
+            return "";
+        }
+        var result = value.replace('&', '§');
+        this.connectionModule.getLogger().debug("getQuitMessage() → " + result);
+        return result;
     }
 
     // ------------------------------------------
-
     // CONNECTION
-
     // ------------------------------------------
 
 }

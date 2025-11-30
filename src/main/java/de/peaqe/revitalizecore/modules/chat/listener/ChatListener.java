@@ -30,31 +30,41 @@ public class ChatListener implements Listener {
         this.chatModule = chatModule;
         this.revitalizeCore = this.chatModule.getRevitalizeCore();
         this.revitalizeCore.getServer().getPluginManager().registerEvents(this, this.revitalizeCore);
+
+        this.chatModule.getLogger().info("ChatListener registered.");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onAsyncChat(AsyncChatEvent event) {
 
-        if (!this.chatModule.getChatConfig().getEnabled()) return;
+        this.chatModule.getLogger().debug("AsyncChatEvent triggered by " + event.getPlayer().getName());
+
+        if (!this.chatModule.getChatConfig().getEnabled()) {
+            this.chatModule.getLogger().debug("Chat filter disabled, ignoring message.");
+            return;
+        }
 
         var player = event.getPlayer();
         var messageComponent = event.originalMessage();
         var plainTextMessage = PlainTextComponentSerializer.plainText().serialize(messageComponent);
 
-        // Bypass
-        if (player.hasPermission("revitalize.chat.bypass")) return;
+        this.chatModule.getLogger().debug("Message received: \"" + plainTextMessage + "\" from " + player.getName());
 
-        // Commands ignorieren außer private msg commands
+        if (player.hasPermission("revitalize.chat.bypass")) {
+            this.chatModule.getLogger().debug(player.getName() + " has bypass permission. Ignoring.");
+            return;
+        }
+
         if (plainTextMessage.startsWith("/") &&
                 !plainTextMessage.matches("^/(msg|tell|w|whisper|pm|m|r)\\b.*")) {
+            this.chatModule.getLogger().debug("Message is a command → ignored.");
             return;
         }
 
         var badWords = chatModule.getChatConfig().getBadWords();
 
-        // Normalize message for matching (lowercase, remove punctuation)
         var normalizedMessage = plainTextMessage.toLowerCase()
-                .replaceAll("[^a-zA-Z0-9äöüß ]", "") // remove punctuation
+                .replaceAll("[^a-zA-Z0-9äöüß ]", "")
                 .trim();
 
         var normalizedWords = normalizedMessage.split("\\s+");
@@ -63,18 +73,22 @@ public class ChatListener implements Listener {
 
             for (var bad : badWords) {
 
-                // WORD DETECTION
                 var p = Pattern.compile("\\b" + Pattern.quote(bad.toLowerCase()) + "\\b");
                 if (p.matcher(word).find()) {
 
-                    // BLOCK
+                    this.chatModule.getLogger().warn("Bad word detected: \"" + bad + "\" in message from " + player.getName());
+
                     if (this.chatModule.getChatConfig().getFilterMode().equals(FilterMode.BLOCK)) {
+
+                        this.chatModule.getLogger().info("Blocking message from " + player.getName());
 
                         player.sendMessage(chatModule.getMessageUtil().compileMessage(
                                 chatModule.getChatConfig().getBlockMessage()
                         ));
 
                         var notifyMsg = chatModule.getChatConfig().getStaffNotifyText();
+                        this.chatModule.getLogger().debug("Notifying staff: " + notifyMsg);
+
                         this.chatModule.getMessageUtil().notifyStaffKey(
                                 notifyMsg,
                                 "%player%", player.getName(),
@@ -82,14 +96,15 @@ public class ChatListener implements Listener {
                         );
 
                         event.setCancelled(true);
+                        this.chatModule.getLogger().debug("Event cancelled.");
                         return;
                     }
 
-                    // REPLACE
                     if (this.chatModule.getChatConfig().getFilterMode().equals(FilterMode.REPLACE)) {
 
-                        var replacement = this.chatModule.getChatConfig().getReplacement();
+                        this.chatModule.getLogger().info("Replacing bad word in message from " + player.getName());
 
+                        var replacement = this.chatModule.getChatConfig().getReplacement();
                         var textColor = this.chatModule.getChatConfig().getTextColor();
 
                         var replacedMessage = plainTextMessage.replaceAll(
@@ -98,25 +113,21 @@ public class ChatListener implements Listener {
                         );
 
                         replacedMessage = textColor + replacedMessage;
-                        event.message(Component.text(replacedMessage));
 
-                        // Team-Notify (unverändert)
-                        /*var notifyMsg = chatModule.getChatConfig().getNotify();
-                        this.chatModule.getMessageUtil().notifyStaffKey(
-                                chatModule.getMessageUtil().compileMessageKey(
-                                        notifyMsg,
-                                        "%player%", player.getName(),
-                                        "%message%", replacedMessage
-                                )
-                        );*/
+                        this.chatModule.getLogger().debug("Replaced message: \"" + replacedMessage + "\"");
+
+                        event.message(Component.text(replacedMessage));
 
                         return;
                     }
 
+                    this.chatModule.getLogger().debug("No filter mode matched. Returning.");
                     return;
                 }
             }
         }
+
+        this.chatModule.getLogger().debug("Message contains no bad words.");
     }
 
 }
